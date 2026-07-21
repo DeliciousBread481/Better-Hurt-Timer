@@ -53,7 +53,7 @@ public class Events {
         Optional<HurtSourceData> optional = BHTConfig.CONFIG.damageFrames.useVanillaNonDirectDamageFrames ?
                 RuntimeData.getFixedSource(entity, source, BHTConfig.CONFIG.damageFrames.nonDirectDamageResistantTime) :
                 RuntimeData.getConfiguredSource(entity, source);
-        long worldTime = entity.world.getTotalWorldTime();
+        long worldTime = Events.serverTime(entity.world);
 
         if (!optional.isPresent()) return;
 
@@ -82,7 +82,7 @@ public class Events {
         if (attackCooldown <= 0) return;
 
         Capabilities.hurt(attacker).ifPresent(capability -> {
-            long worldTime = event.getEntity().world.getTotalWorldTime();
+            long worldTime = Events.serverTime(event.getEntity().world);
             int attackAttemptMarker = Events.getAttackAttemptMarker(attacker);
             if (!capability.allowDirectAttackAttempt(worldTime, attackAttemptMarker, attackCooldown)) {
                 event.setCanceled(true);
@@ -190,5 +190,10 @@ public class Events {
 
     public static boolean isClientWorld(Entity entity) {
         return entity.getEntityWorld().isRemote;
+    }
+    
+    public static long serverTime(net.minecraft.world.World world) {
+        net.minecraft.server.MinecraftServer server = world.getMinecraftServer();
+        return server != null ? server.getTickCounter() : world.getTotalWorldTime();
     }
 }

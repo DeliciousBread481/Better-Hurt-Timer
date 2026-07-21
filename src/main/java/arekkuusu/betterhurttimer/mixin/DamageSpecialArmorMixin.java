@@ -3,6 +3,7 @@ package arekkuusu.betterhurttimer.mixin;
 import arekkuusu.betterhurttimer.BHTConfig;
 import arekkuusu.betterhurttimer.api.capability.Capabilities;
 import arekkuusu.betterhurttimer.api.capability.HurtCapability;
+import arekkuusu.betterhurttimer.common.Events;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.DamageSource;
@@ -18,7 +19,7 @@ public abstract class DamageSpecialArmorMixin {
     private static void damageSpecialArmor(ISpecialArmor armor, EntityLivingBase entity, ItemStack stack, DamageSource source, int damage, int slot) {
         HurtCapability capability = Capabilities.hurt(entity).orElse(null);
         if (capability != null) {
-            long worldTime = entity.world.getTotalWorldTime();
+            long worldTime = Events.serverTime(entity.world);
             if (!capability.canDamageArmor(worldTime)) {
                 return;
             }

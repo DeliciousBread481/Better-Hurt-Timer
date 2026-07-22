@@ -112,6 +112,11 @@ public class HurtCapability implements ICapabilitySerializable<NBTTagCompound>, 
     public void deserializeNBT(NBTTagCompound nbt) {
         Capabilities.HURT_LIMITER.getStorage().readNBT(Capabilities.HURT_LIMITER, this, null, nbt);
     }
+    
+    private static long currentServerTick() {
+        net.minecraft.server.MinecraftServer server = net.minecraftforge.fml.common.FMLCommonHandler.instance().getMinecraftServerInstance();
+        return server != null ? server.getTickCounter() : 0L;
+    }
 
     //** NBT **//
     public static final String LAST_ARMOR_TIMER_NBT = "armorDamageCooldownUntil";
@@ -131,6 +136,13 @@ public class HurtCapability implements ICapabilitySerializable<NBTTagCompound>, 
         NBTTagCompound tag = (NBTTagCompound) nbt;
         instance.armorDamageCooldownUntil = tag.hasKey(LAST_ARMOR_TIMER_NBT) ? tag.getLong(LAST_ARMOR_TIMER_NBT) : tag.getInteger(LAST_ARMOR_TIMER_NBT);
         instance.shieldDamageCooldownUntil = tag.hasKey(LAST_SHIELD_TIMER_NBT) ? tag.getLong(LAST_SHIELD_TIMER_NBT) : tag.getInteger(LAST_SHIELD_TIMER_NBT);
+        long serverTime = currentServerTick();
+        if (instance.armorDamageCooldownUntil != Long.MIN_VALUE && instance.armorDamageCooldownUntil > serverTime) {
+            instance.armorDamageCooldownUntil = Long.MIN_VALUE;
+        }
+        if (instance.shieldDamageCooldownUntil != Long.MIN_VALUE && instance.shieldDamageCooldownUntil > serverTime) {
+            instance.shieldDamageCooldownUntil = Long.MIN_VALUE;
+        }
     }
     //** NBT **//
 
